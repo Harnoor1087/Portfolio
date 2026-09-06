@@ -2,6 +2,48 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      // Safeguard against iframe/sandbox environments where window.fetch has only a getter
+      (function () {
+        try {
+          var targetObj = typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : null);
+          if (!targetObj) return;
+
+          var nativeFetch = targetObj.fetch;
+          var activeFetch = typeof nativeFetch === 'function' ? function () {
+            return nativeFetch.apply(targetObj, arguments);
+          } : nativeFetch;
+
+          try {
+            Object.defineProperty(targetObj, 'fetch', {
+              get: function () {
+                return activeFetch;
+              },
+              set: function (newFn) {
+                activeFetch = newFn;
+              },
+              configurable: true,
+              enumerable: true,
+            });
+          } catch (e1) {
+            try {
+              if (typeof Window !== 'undefined' && Window.prototype) {
+                Object.defineProperty(Window.prototype, 'fetch', {
+                  get: function () {
+                    return activeFetch;
+                  },
+                  set: function (newFn) {
+                    activeFetch = newFn;
+                  },
+                  configurable: true,
+                  enumerable: true,
+                });
+              }
+            } catch (e2) {}
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Developer Portfolio & Admin Dashboard</title>
     <meta name="description" content="Full-stack developer portfolio featuring dynamic project showcase, skills, timeline, contact form, and an admin management dashboard." />

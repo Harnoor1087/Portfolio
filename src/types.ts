@@ -9,6 +9,7 @@ export interface Project {
   githubUrl: string;
   imageUrl: string;
   featured: boolean;
+  visible?: boolean;
   order: number;
   createdAt: string;
   updatedAt: string;

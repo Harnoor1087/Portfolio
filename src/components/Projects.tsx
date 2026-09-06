@@ -7,9 +7,11 @@ import { ProjectCard } from './ProjectCard';
 
 interface ProjectsProps {
   onNavigateToAdmin?: () => void;
+  isAdminLoggedIn?: boolean;
+  refreshTrigger?: number;
 }
 
-export const Projects: React.FC<ProjectsProps> = ({ onNavigateToAdmin }) => {
+export const Projects: React.FC<ProjectsProps> = ({ onNavigateToAdmin, isAdminLoggedIn = false, refreshTrigger = 0 }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +36,20 @@ export const Projects: React.FC<ProjectsProps> = ({ onNavigateToAdmin }) => {
 
   useEffect(() => {
     fetchProjects();
+  }, [refreshTrigger]);
+
+  // Live synchronization: re-fetch if admin makes changes or when window focuses
+  useEffect(() => {
+    const handleSync = () => {
+      fetchProjects();
+    };
+
+    window.addEventListener('portfolio:sync', handleSync);
+    window.addEventListener('focus', handleSync);
+    return () => {
+      window.removeEventListener('portfolio:sync', handleSync);
+      window.removeEventListener('focus', handleSync);
+    };
   }, []);
 
   const handleSeedProjects = async () => {
@@ -195,7 +211,7 @@ export const Projects: React.FC<ProjectsProps> = ({ onNavigateToAdmin }) => {
                 <span>{seeding ? 'Seeding Database...' : 'Seed Showcase Projects'}</span>
               </button>
 
-              {onNavigateToAdmin && (
+              {isAdminLoggedIn && onNavigateToAdmin && (
                 <button
                   id="empty-state-admin-btn"
                   onClick={onNavigateToAdmin}

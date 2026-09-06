@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Eye,
+  EyeOff,
   Calendar,
   X,
 } from 'lucide-react';
@@ -38,6 +39,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibilityFilter, setVisibilityFilter] = useState<'all' | 'visible' | 'draft'>('all');
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Modal states
@@ -62,7 +64,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
     try {
       setLoading(true);
       const [projData, msgData] = await Promise.all([
-        api.getProjects(),
+        api.getProjects(true), // Load full project list including private drafts
         api.getMessages().catch(() => []),
       ]);
       setProjects(projData);
@@ -89,6 +91,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
     setIsModalOpen(true);
   };
 
+  const handleToggleVisibility = async (project: Project) => {
+    try {
+      const nextVisible = !(project.visible !== false);
+      const updated = await api.toggleProjectVisibility(project.id, nextVisible);
+      setProjects(projects.map((p) => (p.id === updated.id ? updated : p)));
+      window.dispatchEvent(new CustomEvent('portfolio:sync'));
+      showNotification(
+        `"${project.title}" is now ${nextVisible ? 'VISIBLE on public portfolio' : 'HIDDEN from public portfolio (Draft)'}.`
+      );
+    } catch (err: any) {
+      showNotification(err.message || 'Failed to update visibility.', 'error');
+    }
+  };
+
   const handleDeletePrompt = (id: string, title: string, type: 'project' | 'message') => {
     setItemToDelete({ id, title, type });
     setDeleteModalOpen(true);
@@ -101,6 +117,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
       if (itemToDelete.type === 'project') {
         await api.deleteProject(itemToDelete.id);
         setProjects(projects.filter((p) => p.id !== itemToDelete.id));
+        window.dispatchEvent(new CustomEvent('portfolio:sync'));
         showNotification(`Project "${itemToDelete.title}" deleted.`);
       } else {
         await api.deleteMessage(itemToDelete.id);
@@ -122,10 +139,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
       if (projectToEdit) {
         const updated = await api.updateProject(projectToEdit.id, data);
         setProjects(projects.map((p) => (p.id === updated.id ? updated : p)));
+        window.dispatchEvent(new CustomEvent('portfolio:sync'));
         showNotification(`Project "${updated.title}" updated successfully.`);
       } else {
         const created = await api.createProject(data);
         setProjects([created, ...projects]);
+        window.dispatchEvent(new CustomEvent('portfolio:sync'));
         showNotification(`New project "${created.title}" published.`);
       }
     } finally {
@@ -138,6 +157,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
       setLoading(true);
       const data = await api.seedProjects(true);
       setProjects(data);
+      window.dispatchEvent(new CustomEvent('portfolio:sync'));
       showNotification('Portfolio database successfully seeded with demo projects.');
     } catch (err: any) {
       showNotification(err.message || 'Failed to seed demo projects.', 'error');
@@ -146,12 +166,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
     }
   };
 
-  const filteredProjects = projects.filter(
-    (p) =>
+  const filteredProjects = projects.filter((p) => {
+    const matchesSearch =
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.techStack.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+      p.techStack.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    const matchesVisibility =
+      visibilityFilter === 'all'
+        ? true
+        : visibilityFilter === 'visible'
+        ? p.visible !== false
+        : p.visible === false;
+
+    return matchesSearch && matchesVisibility;
+  });
+
+  const visibleCount = projects.filter((p) => p.visible !== false).length;
+  const draftCount = projects.filter((p) => p.visible === false).length;
 
   return (
     <div id="admin-management-panel" className="min-h-screen bg-[#050505] pt-20 pb-16 text-[#E0E0E0]">
@@ -228,25 +260,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
         {/* Metric Cards Summary */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="p-5 rounded bg-[#080808] border border-white/5">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-white/40">Total Projects</div>
+            <div className="text-[10px] font-mono uppercase tracking-wider text-white/40">Total in Database</div>
             <div className="text-2xl font-bold font-mono text-white mt-1">{projects.length}</div>
-            <div className="text-[10px] font-mono text-white/30 mt-0.5">Active in database</div>
+            <div className="text-[10px] font-mono text-white/30 mt-0.5">Persisted in db.json</div>
+          </div>
+
+          <div className="p-5 rounded bg-[#080808] border border-emerald-500/20 bg-emerald-950/10">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-emerald-400/80 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span>Live on Portfolio</span>
+            </div>
+            <div className="text-2xl font-bold font-mono text-emerald-400 mt-1">{visibleCount}</div>
+            <div className="text-[10px] font-mono text-emerald-400/50 mt-0.5">Visible to public visitors</div>
           </div>
 
           <div className="p-5 rounded bg-[#080808] border border-white/5">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-white/40">Featured Projects</div>
-            <div className="text-2xl font-bold font-mono text-[#F27D26] mt-1">
-              {projects.filter((p) => p.featured).length}
+            <div className="text-[10px] font-mono uppercase tracking-wider text-white/40 flex items-center gap-1.5">
+              <EyeOff className="w-3 h-3 text-white/40" />
+              <span>Drafts / Hidden</span>
             </div>
-            <div className="text-[10px] font-mono text-white/30 mt-0.5">Highlighted on landing</div>
-          </div>
-
-          <div className="p-5 rounded bg-[#080808] border border-white/5">
-            <div className="text-[10px] font-mono uppercase tracking-wider text-white/40">Categories</div>
-            <div className="text-2xl font-bold font-mono text-white mt-1">
-              {new Set(projects.map((p) => p.category)).size}
-            </div>
-            <div className="text-[10px] font-mono text-white/30 mt-0.5">Engineering domains</div>
+            <div className="text-2xl font-bold font-mono text-white/80 mt-1">{draftCount}</div>
+            <div className="text-[10px] font-mono text-white/30 mt-0.5">Private to owner only</div>
           </div>
 
           <div className="p-5 rounded bg-[#080808] border border-white/5">
@@ -258,7 +292,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
 
         {/* Tab & Filter Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <div className="inline-flex p-1 bg-[#080808] border border-white/10 rounded">
               <button
                 id="admin-tab-projects"
@@ -288,28 +322,66 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
             </div>
 
             {activeTab === 'projects' && (
-              <div className="hidden sm:inline-flex p-1 bg-[#080808] border border-white/10 rounded">
-                <button
-                  id="admin-view-table-btn"
-                  onClick={() => setViewMode('table')}
-                  className={`p-1.5 rounded text-white/50 hover:text-white transition-colors cursor-pointer ${
-                    viewMode === 'table' ? 'bg-white/10 text-white' : ''
-                  }`}
-                  title="Table View"
-                >
-                  <TableIcon className="w-4 h-4" />
-                </button>
-                <button
-                  id="admin-view-cards-btn"
-                  onClick={() => setViewMode('cards')}
-                  className={`p-1.5 rounded text-white/50 hover:text-white transition-colors cursor-pointer ${
-                    viewMode === 'cards' ? 'bg-white/10 text-white' : ''
-                  }`}
-                  title="Cards View"
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                </button>
-              </div>
+              <>
+                {/* Visibility Filter Selector */}
+                <div className="inline-flex p-1 bg-[#080808] border border-white/10 rounded text-xs font-mono">
+                  <button
+                    onClick={() => setVisibilityFilter('all')}
+                    className={`px-2.5 py-1 rounded transition-colors cursor-pointer ${
+                      visibilityFilter === 'all'
+                        ? 'bg-white/10 text-white font-bold'
+                        : 'text-white/40 hover:text-white/70'
+                    }`}
+                  >
+                    All ({projects.length})
+                  </button>
+                  <button
+                    onClick={() => setVisibilityFilter('visible')}
+                    className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1 cursor-pointer ${
+                      visibilityFilter === 'visible'
+                        ? 'bg-emerald-500/20 text-emerald-300 font-bold'
+                        : 'text-white/40 hover:text-emerald-400'
+                    }`}
+                  >
+                    <Eye className="w-3 h-3 text-emerald-400" />
+                    <span>Live ({visibleCount})</span>
+                  </button>
+                  <button
+                    onClick={() => setVisibilityFilter('draft')}
+                    className={`px-2.5 py-1 rounded transition-colors flex items-center gap-1 cursor-pointer ${
+                      visibilityFilter === 'draft'
+                        ? 'bg-white/20 text-white font-bold'
+                        : 'text-white/40 hover:text-white/70'
+                    }`}
+                  >
+                    <EyeOff className="w-3 h-3 text-white/40" />
+                    <span>Drafts ({draftCount})</span>
+                  </button>
+                </div>
+
+                <div className="hidden sm:inline-flex p-1 bg-[#080808] border border-white/10 rounded">
+                  <button
+                    id="admin-view-table-btn"
+                    onClick={() => setViewMode('table')}
+                    className={`p-1.5 rounded text-white/50 hover:text-white transition-colors cursor-pointer ${
+                      viewMode === 'table' ? 'bg-white/10 text-white' : ''
+                    }`}
+                    title="Table View"
+                  >
+                    <TableIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    id="admin-view-cards-btn"
+                    onClick={() => setViewMode('cards')}
+                    className={`p-1.5 rounded text-white/50 hover:text-white transition-colors cursor-pointer ${
+                      viewMode === 'cards' ? 'bg-white/10 text-white' : ''
+                    }`}
+                    title="Cards View"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </button>
+                </div>
+              </>
             )}
           </div>
 
@@ -392,7 +464,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
                         <th className="py-3.5 px-4 font-semibold">Project</th>
                         <th className="py-3.5 px-4 font-semibold">Category</th>
                         <th className="py-3.5 px-4 font-semibold hidden md:table-cell">Tech Stack</th>
-                        <th className="py-3.5 px-4 font-semibold text-center">Status</th>
+                        <th className="py-3.5 px-4 font-semibold text-center">Featured</th>
+                        <th className="py-3.5 px-4 font-semibold text-center">Portfolio Status</th>
                         <th className="py-3.5 px-4 font-semibold hidden sm:table-cell">Links</th>
                         <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
                       </tr>
@@ -458,6 +531,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
                             ) : (
                               <span className="text-white/30 text-xs font-mono">Standard</span>
                             )}
+                          </td>
+
+                          {/* Portfolio Visibility Control */}
+                          <td className="py-3.5 px-4 text-center">
+                            <button
+                              id={`admin-toggle-visibility-${project.id}`}
+                              onClick={() => handleToggleVisibility(project)}
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-mono font-semibold uppercase tracking-wider transition-all cursor-pointer border ${
+                                project.visible !== false
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
+                                  : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white/70'
+                              }`}
+                              title={
+                                project.visible !== false
+                                  ? 'Click to Hide from public portfolio'
+                                  : 'Click to Publish to public portfolio'
+                              }
+                            >
+                              {project.visible !== false ? (
+                                <>
+                                  <Eye className="w-3 h-3 text-emerald-400" />
+                                  <span>Visible</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOff className="w-3 h-3 text-white/40" />
+                                  <span>Draft</span>
+                                </>
+                              )}
+                            </button>
                           </td>
 
                           {/* Links */}
@@ -535,6 +638,35 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
                             <Sparkles className="w-3 h-3 text-black" /> Featured
                           </div>
                         )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleVisibility(project);
+                          }}
+                          className={`absolute bottom-2 left-2 px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 shadow-md transition-colors cursor-pointer border ${
+                            project.visible !== false
+                              ? 'bg-emerald-950/90 text-emerald-300 border-emerald-500/40 hover:bg-emerald-900'
+                              : 'bg-black/90 text-zinc-400 border-zinc-700 hover:bg-zinc-800 hover:text-zinc-200'
+                          }`}
+                          title={
+                            project.visible !== false
+                              ? 'Visible on public portfolio (click to set as draft)'
+                              : 'Hidden draft (click to publish to portfolio)'
+                          }
+                        >
+                          {project.visible !== false ? (
+                            <>
+                              <Eye className="w-3 h-3 text-emerald-400" />
+                              <span>Live</span>
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="w-3 h-3 text-zinc-400" />
+                              <span>Draft</span>
+                            </>
+                          )}
+                        </button>
                         <div className="absolute top-2 right-2 px-2 py-0.5 rounded bg-black/80 text-white/80 text-[10px] font-mono uppercase tracking-wider border border-white/10">
                           {project.category}
                         </div>

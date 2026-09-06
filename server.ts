@@ -27,6 +27,7 @@ interface DbSchema {
     githubUrl: string;
     imageUrl: string;
     featured: boolean;
+    visible?: boolean;
     order: number;
     createdAt: string;
     updatedAt: string;
@@ -136,7 +137,12 @@ function initDb(): DbSchema {
 
   try {
     const raw = fs.readFileSync(DB_FILE, "utf-8");
-    return JSON.parse(raw) as DbSchema;
+    const parsed = JSON.parse(raw) as DbSchema;
+    parsed.projects = (parsed.projects || []).map((p) => ({
+      ...p,
+      visible: p.visible !== undefined ? p.visible : true,
+    }));
+    return parsed;
   } catch (err) {
     console.error("Failed to parse db.json, re-initializing:", err);
     const initialData: DbSchema = {
@@ -225,10 +231,19 @@ app.post("/api/auth/logout", (req, res) => {
   res.json({ success: true });
 });
 
-// GET /api/projects - Public list of projects
-app.get("/api/projects", (_req, res) => {
+// GET /api/projects - Public list of projects (or all projects if requested by authenticated admin)
+app.get("/api/projects", (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1];
+  const isAdmin = Boolean(token && activeTokens.has(token));
+  const includeHidden = req.query.all === "true" && isAdmin;
+
+  const targetProjects = includeHidden
+    ? db.projects
+    : db.projects.filter((p) => p.visible !== false);
+
   // Return sorted: featured first, then by order asc
-  const sorted = [...db.projects].sort((a, b) => {
+  const sorted = [...targetProjects].sort((a, b) => {
     if (a.featured !== b.featured) {
       return a.featured ? -1 : 1;
     }
@@ -248,7 +263,7 @@ app.get("/api/projects/:id", (req, res) => {
 
 // POST /api/projects - Create project (Protected)
 app.post("/api/projects", requireAdminAuth, (req, res) => {
-  const { title, tagline, description, category, techStack, liveUrl, githubUrl, imageUrl, featured, order } = req.body;
+  const { title, tagline, description, category, techStack, liveUrl, githubUrl, imageUrl, featured, visible, order } = req.body;
 
   if (!title || !description) {
     return res.status(400).json({ error: "Title and description are required" });
@@ -265,6 +280,7 @@ app.post("/api/projects", requireAdminAuth, (req, res) => {
     githubUrl: githubUrl ? String(githubUrl).trim() : "",
     imageUrl: imageUrl ? String(imageUrl).trim() : "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1000&auto=format&fit=crop",
     featured: Boolean(featured),
+    visible: visible !== undefined ? Boolean(visible) : true,
     order: typeof order === "number" ? order : db.projects.length + 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -284,7 +300,7 @@ app.put("/api/projects/:id", requireAdminAuth, (req, res) => {
   }
 
   const existing = db.projects[index];
-  const { title, tagline, description, category, techStack, liveUrl, githubUrl, imageUrl, featured, order } = req.body;
+  const { title, tagline, description, category, techStack, liveUrl, githubUrl, imageUrl, featured, visible, order } = req.body;
 
   const updatedProject = {
     ...existing,
@@ -297,6 +313,7 @@ app.put("/api/projects/:id", requireAdminAuth, (req, res) => {
     githubUrl: githubUrl !== undefined ? String(githubUrl).trim() : existing.githubUrl,
     imageUrl: imageUrl !== undefined ? String(imageUrl).trim() : existing.imageUrl,
     featured: featured !== undefined ? Boolean(featured) : existing.featured,
+    visible: visible !== undefined ? Boolean(visible) : (existing.visible ?? true),
     order: typeof order === "number" ? order : existing.order,
     updatedAt: new Date().toISOString(),
   };
@@ -305,6 +322,24 @@ app.put("/api/projects/:id", requireAdminAuth, (req, res) => {
   saveDb(db);
 
   res.json(updatedProject);
+});
+
+// PATCH /api/projects/:id/visibility - Toggle project visibility directly (Protected)
+app.patch("/api/projects/:id/visibility", requireAdminAuth, (req, res) => {
+  const index = db.projects.findIndex((p) => p.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ error: "Project not found" });
+  }
+
+  const current = db.projects[index];
+  const newVisible = req.body.visible !== undefined ? Boolean(req.body.visible) : !(current.visible !== false);
+  current.visible = newVisible;
+  current.updatedAt = new Date().toISOString();
+
+  db.projects[index] = current;
+  saveDb(db);
+
+  res.json(current);
 });
 
 // DELETE /api/projects/:id - Delete project (Protected)

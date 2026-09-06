@@ -26,9 +26,12 @@ function getAuthHeaders(): HeadersInit {
 }
 
 export const api = {
-  // Public project fetching
-  async getProjects(): Promise<Project[]> {
-    const res = await fetch('/api/projects');
+  // Project fetching (public or full admin list)
+  async getProjects(includeAll = false): Promise<Project[]> {
+    const url = includeAll ? '/api/projects?all=true' : '/api/projects';
+    const res = await fetch(url, {
+      headers: includeAll ? getAuthHeaders() : { 'Content-Type': 'application/json' },
+    });
     if (!res.ok) {
       throw new Error(`Failed to fetch projects: ${res.statusText}`);
     }
@@ -110,7 +113,7 @@ export const api = {
     return data;
   },
 
-  async updateProject(id: string, project: Partial<ProjectInput>): Promise<Project> {
+  async updateProject(id: string, project: Partial<ProjectInput> & { visible?: boolean }): Promise<Project> {
     const res = await fetch(`/api/projects/${id}`, {
       method: 'PUT',
       headers: getAuthHeaders(),
@@ -119,6 +122,19 @@ export const api = {
     const data = await res.json();
     if (!res.ok) {
       throw new Error(data.error || 'Failed to update project');
+    }
+    return data;
+  },
+
+  async toggleProjectVisibility(id: string, visible?: boolean): Promise<Project> {
+    const res = await fetch(`/api/projects/${id}/visibility`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ visible }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to update visibility');
     }
     return data;
   },

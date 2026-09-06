@@ -115,23 +115,28 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, isAdmin
 
         {/* Right Action Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          {/* Admin Dashboard Trigger */}
-          <button
-            id="nav-admin-toggle-btn"
-            onClick={() => onNavigate(currentView === 'admin' ? 'portfolio' : 'admin')}
-            className={`px-3 py-1.5 rounded border text-xs uppercase tracking-[0.15em] font-medium flex items-center gap-2 transition-colors cursor-pointer ${
-              currentView === 'admin'
-                ? 'bg-[#F27D26]/15 border-[#F27D26]/40 text-[#F27D26]'
-                : 'bg-white/5 border-white/10 hover:bg-white/10 text-[#F27D26]'
-            }`}
-            title="Admin Management Panel"
-          >
-            <Shield className="w-3.5 h-3.5 text-[#F27D26]" />
-            <span>Admin {isAdminLoggedIn ? 'Panel' : 'Portal'}</span>
-            {isAdminLoggedIn && (
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            )}
-          </button>
+          {/* Admin Dashboard Trigger - Only visible to authenticated owner or when inside admin view */}
+          {currentView === 'admin' ? (
+            <button
+              id="nav-admin-toggle-btn"
+              onClick={() => onNavigate('portfolio')}
+              className="px-3.5 py-1.5 rounded border border-[#F27D26]/40 bg-[#F27D26]/10 text-[#F27D26] text-xs uppercase tracking-[0.15em] font-medium flex items-center gap-2 transition-colors cursor-pointer"
+              title="Return to Public Portfolio"
+            >
+              <span>← Public Portfolio</span>
+            </button>
+          ) : isAdminLoggedIn ? (
+            <button
+              id="nav-admin-toggle-btn"
+              onClick={() => onNavigate('admin')}
+              className="px-3 py-1.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-mono uppercase tracking-[0.15em] flex items-center gap-2 transition-colors cursor-pointer"
+              title="You are logged in as owner. Press Ctrl+Shift+A or click to open Admin Dashboard."
+            >
+              <Shield className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Owner Panel</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            </button>
+          ) : null}
 
           {currentView === 'portfolio' && (
             <button
@@ -147,14 +152,26 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, isAdmin
 
         {/* Mobile Menu Hamburger Button */}
         <div className="flex md:hidden items-center gap-2">
-          <button
-            id="nav-mobile-admin-btn"
-            onClick={() => onNavigate(currentView === 'admin' ? 'portfolio' : 'admin')}
-            className="p-2 rounded bg-white/5 border border-white/10 text-[#F27D26]"
-            aria-label="Toggle Admin"
-          >
-            <Shield className="w-4 h-4 text-[#F27D26]" />
-          </button>
+          {isAdminLoggedIn && currentView === 'portfolio' && (
+            <button
+              id="nav-mobile-admin-btn"
+              onClick={() => onNavigate('admin')}
+              className="p-2 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+              aria-label="Open Admin Dashboard"
+              title="Owner Session Active"
+            >
+              <Shield className="w-4 h-4 text-emerald-400" />
+            </button>
+          )}
+          {currentView === 'admin' && (
+            <button
+              id="nav-mobile-return-btn"
+              onClick={() => onNavigate('portfolio')}
+              className="px-2.5 py-1.5 rounded bg-white/5 border border-white/10 text-white text-xs font-mono"
+            >
+              ← Site
+            </button>
+          )}
           <button
             id="nav-mobile-menu-toggle"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -229,19 +246,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, isAdmin
               </button>
             )}
 
-            <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
-              <button
-                id="mobile-admin-switch"
-                onClick={() => {
-                  onNavigate(currentView === 'admin' ? 'portfolio' : 'admin');
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-2.5 px-4 rounded text-xs uppercase tracking-[0.15em] font-semibold flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-[#F27D26]"
-              >
-                <Shield className="w-4 h-4 text-[#F27D26]" />
-                <span>{currentView === 'admin' ? 'View Public Site' : 'Admin Management Dashboard'}</span>
-              </button>
-            </div>
+            {(isAdminLoggedIn || currentView === 'admin') && (
+              <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
+                <button
+                  id="mobile-admin-switch"
+                  onClick={() => {
+                    onNavigate(currentView === 'admin' ? 'portfolio' : 'admin');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full py-2.5 px-4 rounded text-xs uppercase tracking-[0.15em] font-semibold flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-[#F27D26]"
+                >
+                  <Shield className="w-4 h-4 text-[#F27D26]" />
+                  <span>{currentView === 'admin' ? 'View Public Site' : 'Admin Management Dashboard'}</span>
+                </button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

@@ -46,6 +46,18 @@ export default function App() {
     checkAuth();
   }, []);
 
+  // Keyboard shortcut: Ctrl/Cmd + Shift + A to open admin portal secretly
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        navigateTo('admin');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const navigateTo = (view: 'portfolio' | 'admin') => {
     setCurrentView(view);
     const newPath = view === 'admin' ? '/admin' : '/';
@@ -96,7 +108,10 @@ export default function App() {
               onContactClick={() => scrollToSection('contact')}
             />
             <About />
-            <Projects onNavigateToAdmin={() => navigateTo('admin')} />
+            <Projects
+              onNavigateToAdmin={() => navigateTo('admin')}
+              isAdminLoggedIn={isAdminLoggedIn}
+            />
             <Contact />
             <Footer onNavigateToAdmin={() => navigateTo('admin')} />
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Sparkles, Plus, Image as ImageIcon, Link as LinkIcon, Github, Tag, Layers, Check } from 'lucide-react';
+import { X, Sparkles, Plus, Image as ImageIcon, Link as LinkIcon, Github, Tag, Layers, Check, Eye, EyeOff } from 'lucide-react';
 import { Project, ProjectInput } from '../../types';
 
 interface ProjectModalProps {
@@ -37,6 +37,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
     githubUrl: '',
     imageUrl: PRESET_IMAGES[0].url,
     featured: false,
+    visible: true,
     order: 1,
   });
 
@@ -55,6 +56,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         githubUrl: projectToEdit.githubUrl || '',
         imageUrl: projectToEdit.imageUrl || PRESET_IMAGES[0].url,
         featured: Boolean(projectToEdit.featured),
+        visible: projectToEdit.visible !== false,
         order: projectToEdit.order || 1,
       });
     } else {
@@ -68,6 +70,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
         githubUrl: '',
         imageUrl: PRESET_IMAGES[0].url,
         featured: false,
+        visible: true,
         order: 1,
       });
     }
@@ -359,34 +362,58 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             </div>
           </div>
 
-          {/* Featured & Order */}
-          <div className="pt-2 flex flex-wrap items-center justify-between gap-4 border-t border-white/10">
-            <label className="flex items-center gap-3 cursor-pointer select-none">
-              <input
-                id="project-featured-toggle"
-                type="checkbox"
-                checked={formData.featured}
-                onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                className="w-4 h-4 rounded border-white/20 bg-black/60 text-[#F27D26] focus:ring-[#F27D26] cursor-pointer accent-[#F27D26]"
-              />
-              <span className="text-xs font-mono text-white flex items-center gap-1.5 uppercase tracking-wider">
-                <Sparkles className="w-4 h-4 text-[#F27D26]" />
-                Featured Project (highlighted on public site)
-              </span>
-            </label>
+          {/* Visibility, Featured & Order */}
+          <div className="pt-3 border-t border-white/10 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    id="project-visible-toggle"
+                    type="checkbox"
+                    checked={formData.visible !== false}
+                    onChange={(e) => setFormData({ ...formData, visible: e.target.checked })}
+                    className="w-4 h-4 rounded border-white/20 bg-black/60 text-emerald-500 focus:ring-emerald-500 cursor-pointer accent-emerald-500"
+                  />
+                  <span className="text-xs font-mono text-white flex items-center gap-1.5 uppercase tracking-wider">
+                    <Eye className="w-4 h-4 text-emerald-400" />
+                    <span>Visible on Portfolio</span>
+                    <span className="text-[10px] text-white/40 normal-case font-sans">
+                      (uncheck to save as private draft)
+                    </span>
+                  </span>
+                </label>
 
-            <div className="flex items-center gap-2">
-              <label htmlFor="project-order" className="text-xs font-mono text-white/50">
-                Display Order:
-              </label>
-              <input
-                id="project-order"
-                type="number"
-                min={1}
-                value={formData.order}
-                onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value, 10) || 1 })}
-                className="w-20 px-3 py-1.5 rounded bg-black/60 border border-white/10 text-white text-center text-xs font-mono focus:outline-none focus:border-[#F27D26]"
-              />
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <input
+                    id="project-featured-toggle"
+                    type="checkbox"
+                    checked={formData.featured}
+                    onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                    className="w-4 h-4 rounded border-white/20 bg-black/60 text-[#F27D26] focus:ring-[#F27D26] cursor-pointer accent-[#F27D26]"
+                  />
+                  <span className="text-xs font-mono text-white flex items-center gap-1.5 uppercase tracking-wider">
+                    <Sparkles className="w-4 h-4 text-[#F27D26]" />
+                    <span>Featured Spotlight</span>
+                    <span className="text-[10px] text-white/40 normal-case font-sans">
+                      (highlighted top placement)
+                    </span>
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex items-center gap-2 self-start sm:self-center">
+                <label htmlFor="project-order" className="text-xs font-mono text-white/50">
+                  Display Order:
+                </label>
+                <input
+                  id="project-order"
+                  type="number"
+                  min={1}
+                  value={formData.order}
+                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value, 10) || 1 })}
+                  className="w-20 px-3 py-1.5 rounded bg-black/60 border border-white/10 text-white text-center text-xs font-mono focus:outline-none focus:border-[#F27D26]"
+                />
+              </div>
             </div>
           </div>
 
