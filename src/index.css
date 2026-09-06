@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-flair: #F27D26;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: #050505;
+  color: #E0E0E0;
+}
+
+::selection {
+  background-color: #F27D26;
+  color: #000000;
+}

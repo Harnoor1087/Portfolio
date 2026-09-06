@@ -1,0 +1,124 @@
+{
+  "projects": [
+    {
+      "id": "proj-1",
+      "title": "PulseStream Analytics",
+      "tagline": "High-throughput real-time event streaming and observability platform",
+      "description": "An enterprise-grade telemetry engine processing 100k+ events/sec with sub-second latency, interactive DAG pipelines, and dynamic anomaly alerts.",
+      "category": "Full-Stack",
+      "techStack": [
+        "React",
+        "TypeScript",
+        "Node.js",
+        "Apache Kafka",
+        "ClickHouse",
+        "Tailwind CSS",
+        "Docker"
+      ],
+      "liveUrl": "https://github.com",
+      "githubUrl": "https://github.com",
+      "imageUrl": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop",
+      "featured": true,
+      "order": 1,
+      "createdAt": "2025-01-15T10:00:00.000Z",
+      "updatedAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "proj-2",
+      "title": "Aura Canvas Studio",
+      "tagline": "Collaborative real-time canvas with generative AI design assists",
+      "description": "Multi-user vector drafting canvas powered by WebSockets and CRDTs for frictionless remote whiteboard brainstorming with smart layout suggestions.",
+      "category": "AI & Data",
+      "techStack": [
+        "React 19",
+        "Canvas API",
+        "WebSockets",
+        "Gemini API",
+        "Tailwind CSS",
+        "Vite"
+      ],
+      "liveUrl": "https://github.com",
+      "githubUrl": "https://github.com",
+      "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000&auto=format&fit=crop",
+      "featured": true,
+      "order": 2,
+      "createdAt": "2025-02-10T14:30:00.000Z",
+      "updatedAt": "2025-02-10T14:30:00.000Z"
+    },
+    {
+      "id": "proj-3",
+      "title": "OmniVault Zero-Trust",
+      "tagline": "Client-side encrypted secrets manager for engineering teams",
+      "description": "Zero-knowledge encrypted cloud credential vault leveraging Web Crypto API, WebAuthn biometrics, and automated rotation webhooks for infrastructure secrets.",
+      "category": "Backend & Cloud",
+      "techStack": [
+        "TypeScript",
+        "Express",
+        "Web Crypto API",
+        "PostgreSQL",
+        "Redis",
+        "Docker"
+      ],
+      "liveUrl": "https://github.com",
+      "githubUrl": "https://github.com",
+      "imageUrl": "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000&auto=format&fit=crop",
+      "featured": true,
+      "order": 3,
+      "createdAt": "2025-03-01T09:00:00.000Z",
+      "updatedAt": "2025-03-01T09:00:00.000Z"
+    },
+    {
+      "id": "proj-4",
+      "title": "DevMorph CLI & SDK",
+      "tagline": "Astute code transformation toolchain with AST pattern matching",
+      "description": "Blazing-fast developer toolkit for executing large-scale automated refactoring, dependency migrations, and architecture enforcement across monorepos.",
+      "category": "Backend & Cloud",
+      "techStack": [
+        "Rust",
+        "Node.js",
+        "Babel AST",
+        "TypeScript",
+        "npm"
+      ],
+      "liveUrl": "https://github.com",
+      "githubUrl": "https://github.com",
+      "imageUrl": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1000&auto=format&fit=crop",
+      "featured": false,
+      "order": 4,
+      "createdAt": "2024-11-20T11:20:00.000Z",
+      "updatedAt": "2024-11-20T11:20:00.000Z"
+    },
+    {
+      "id": "proj-5",
+      "title": "Prism UI Design System",
+      "tagline": "Accessible, tokens-driven component library with fluid ergonomics",
+      "description": "Comprehensive React & Web Components library featuring WCAG 2.1 AAA compliance, fluid spacing tokens, dark/light adaptive theming, and extensive documentation.",
+      "category": "Frontend",
+      "techStack": [
+        "React",
+        "TypeScript",
+        "Tailwind CSS",
+        "Radix UI",
+        "Storybook"
+      ],
+      "liveUrl": "https://github.com",
+      "githubUrl": "https://github.com",
+      "imageUrl": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?q=80&w=1000&auto=format&fit=crop",
+      "featured": false,
+      "order": 5,
+      "createdAt": "2024-10-05T16:45:00.000Z",
+      "updatedAt": "2024-10-05T16:45:00.000Z"
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-1788708386531",
+      "name": "Jordan Lee",
+      "email": "jordan@example.com",
+      "subject": "Staff SWE Role",
+      "message": "Hi Alex, impressed by PulseStream!",
+      "createdAt": "2026-09-06T15:26:26.532Z",
+      "read": false
+    }
+  ]
+}

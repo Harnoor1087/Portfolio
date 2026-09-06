@@ -1,0 +1,6 @@
+{
+  "name": "Developer Portfolio & Admin Dashboard",
+  "description": "Full-stack developer portfolio featuring dynamic project showcase, skills, timeline, contact form, and an admin management dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
