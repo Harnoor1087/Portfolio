@@ -1,4 +1,183 @@
-import { Project, TimelineItem, SkillCategory } from '../types';
+import { Project, TimelineItem, SkillCategory, UserProfile } from '../types';
+
+export const DEFAULT_PROFILE: UserProfile = {
+  // Identity & Navigation
+  name: 'Alex Rivera',
+  roleTitle: 'Staff Systems Engineer',
+  badgeRole: 'Staff SWE',
+  availabilityStatus: 'Available for Staff Engineering & Architecture 2026',
+  location: 'San Francisco, CA & Remote',
+  timezone: 'Pacific Time (UTC-7)',
+  email: 'alex.rivera.swe@gmail.com',
+
+  // Hero Section
+  heroHeadlineLine1: 'STAFF',
+  heroHeadlineLine2: 'SYSTEMS',
+  heroHeadlineLine3: 'ENGINEER',
+  heroQuote:
+    'Bridging the fragile gap between high-end digital aesthetics and resilient, distributed cloud architectures with mathematical precision.',
+  stats: [
+    { value: '07+', label: 'Years Experience' },
+    { value: '250K+', label: 'MAU Supported' },
+    { value: '99.99%', label: 'Uptime SLA' },
+    { value: '35+', label: 'Shipped Systems' },
+  ],
+
+  // Social Links
+  githubUrl: 'https://github.com',
+  linkedinUrl: 'https://linkedin.com',
+  twitterUrl: 'https://twitter.com',
+  resumeUrl: 'https://example.com/resume.pdf',
+
+  // About Section
+  aboutQuote:
+    'Engineering revolves around cognitive ergonomics for developers, zero-tolerance for silent failures in distributed state, and rigorous digital aesthetics on the client.',
+  aboutBio1:
+    'I am a full-stack engineer and distributed systems architect with over seven years of professional experience turning ambiguous product objectives into resilient, high-velocity infrastructure.',
+  aboutBio2:
+    'Whether orchestrating high-throughput Kafka streaming services or refining React design systems with sub-millisecond interaction speeds, I take ownership across the entire continuum from concept through zero-downtime deployment.',
+  competencies: [
+    {
+      title: 'Distributed Architecture',
+      description: 'Event-driven systems, micro-frontends, caching tiers, and resilient RPC interfaces.',
+    },
+    {
+      title: 'Client-Side Performance',
+      description: 'Strict bundle budgets, React Server Components, SSR hydration tuning, and Framer Motion choreography.',
+    },
+    {
+      title: 'Developer Experience (DX)',
+      description: 'AST code generators, monorepo toolchains, CI/CD automated test parallelization.',
+    },
+    {
+      title: 'Security & Zero-Trust',
+      description: 'WebAuthn, OAuth2/OIDC, Web Crypto encryption, role-based authorization pipelines.',
+    },
+  ],
+
+  // Skills
+  skills: [
+    {
+      name: 'Frontend & UI',
+      skills: [
+        { name: 'React 19 / Next.js', level: 'Expert' },
+        { name: 'TypeScript', level: 'Expert' },
+        { name: 'Tailwind CSS', level: 'Expert' },
+        { name: 'Framer Motion', level: 'Advanced' },
+        { name: 'State Management', level: 'Advanced' },
+        { name: 'Web Performance & a11y', level: 'Expert' },
+      ],
+    },
+    {
+      name: 'Backend & APIs',
+      skills: [
+        { name: 'Node.js / Express', level: 'Expert' },
+        { name: 'REST & GraphQL APIs', level: 'Expert' },
+        { name: 'WebSockets & SSE', level: 'Advanced' },
+        { name: 'Microservices', level: 'Advanced' },
+        { name: 'Authentication & RBAC', level: 'Advanced' },
+      ],
+    },
+    {
+      name: 'Databases & Storage',
+      skills: [
+        { name: 'PostgreSQL', level: 'Expert' },
+        { name: 'Redis', level: 'Advanced' },
+        { name: 'ClickHouse', level: 'Proficient' },
+        { name: 'MongoDB / Firestore', level: 'Advanced' },
+        { name: 'Prisma / Drizzle ORM', level: 'Expert' },
+      ],
+    },
+    {
+      name: 'Cloud & DevOps',
+      skills: [
+        { name: 'Docker & Containers', level: 'Advanced' },
+        { name: 'AWS & Cloud Run', level: 'Advanced' },
+        { name: 'CI/CD GitHub Actions', level: 'Expert' },
+        { name: 'Linux / Bash Scripting', level: 'Advanced' },
+        { name: 'System Monitoring', level: 'Proficient' },
+      ],
+    },
+  ],
+
+  // Timeline
+  experience: [
+    {
+      id: 'exp-1',
+      type: 'experience',
+      title: 'Senior Full-Stack Engineer',
+      organization: 'Strata Cloud Solutions',
+      location: 'San Francisco, CA (Remote)',
+      period: '2023 — Present',
+      description: [
+        'Spearheaded the redesign of core distributed dashboard services, cutting P99 latency by 42% across 250,000 monthly active users.',
+        'Designed real-time telemetry streaming architecture utilizing Kafka, WebSocket microservices, and reactive React state machines.',
+        'Mentored 6 junior and mid-level engineers in TypeScript best practices, CI/CD pipeline optimization, and automated end-to-end testing.',
+      ],
+      skills: ['TypeScript', 'React', 'Node.js', 'Kafka', 'Docker', 'AWS'],
+    },
+    {
+      id: 'exp-2',
+      type: 'experience',
+      title: 'Full-Stack Software Engineer',
+      organization: 'Vanguard Labs',
+      location: 'Austin, TX',
+      period: '2021 — 2023',
+      description: [
+        'Built and maintained customer-facing billing & subscription micro-frontends processing over $12M in ARR with Stripe integration.',
+        'Implemented design token architecture bridging Figma designs and React component libraries, accelerating sprint velocity by 30%.',
+        'Engineered idempotent REST & GraphQL APIs backed by PostgreSQL and Redis caches.',
+      ],
+      skills: ['React', 'GraphQL', 'PostgreSQL', 'Express', 'Tailwind CSS', 'Redis'],
+    },
+    {
+      id: 'exp-3',
+      type: 'experience',
+      title: 'Frontend Developer',
+      organization: 'Apex Interactive Studio',
+      location: 'Boston, MA',
+      period: '2019 — 2021',
+      description: [
+        'Developed bespoke web applications and interactive landing pages for high-growth tech startups.',
+        'Achieved 98+ Google Lighthouse performance, accessibility, and SEO scores on all client deliverables.',
+      ],
+      skills: ['JavaScript', 'React', 'HTML5/CSS3', 'REST APIs', 'Webpack'],
+    },
+  ],
+  education: [
+    {
+      id: 'edu-1',
+      type: 'education',
+      title: 'B.S. in Computer Science',
+      organization: 'University of Washington',
+      location: 'Seattle, WA',
+      period: '2015 — 2019',
+      description: [
+        'Focused on Distributed Systems, Algorithms & Data Structures, and Human-Computer Interaction.',
+        'Magna Cum Laude honors; President of the Open Source Developer Guild.',
+      ],
+      skills: ['Distributed Systems', 'Algorithms', 'Computer Architecture'],
+    },
+    {
+      id: 'edu-2',
+      type: 'education',
+      title: 'Cloud Architecture & Security Certification',
+      organization: 'AWS Certified Solutions Architect',
+      location: 'Online',
+      period: '2022',
+      description: [
+        'Specialized in high-availability multi-region deployments, IAM zero-trust policy design, and infrastructure-as-code.',
+      ],
+      skills: ['AWS IAM', 'Terraform', 'VPC Peering', 'ECS/EKS'],
+    },
+  ],
+
+  // Contact Section
+  contactHeading: "Let's construct something extraordinary together",
+  contactSubheading:
+    'Whether you have a Staff/Principal engineering opportunity, need architectural advisory for a distributed platform, or want to discuss novel ideas—my inbox is always open.',
+  responseSla: 'Within 24 business hours',
+};
 
 export const INITIAL_PROJECTS: Project[] = [
   {

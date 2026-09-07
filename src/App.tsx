@@ -8,11 +8,40 @@ import { Footer } from './components/Footer';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { AdminDashboard } from './components/admin/AdminDashboard';
 import { api, getStoredToken } from './services/api';
+import { UserProfile } from './types';
+import { DEFAULT_PROFILE } from './data/initialData';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<'portfolio' | 'admin'>('portfolio');
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
+  const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
+
+  // Fetch dynamic profile data on mount
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const data = await api.getProfile();
+        setProfile(data);
+      } catch (err) {
+        console.warn('Using default profile due to fetch error:', err);
+      }
+    };
+    fetchProfileData();
+
+    const handleSync = () => {
+      fetchProfileData();
+    };
+    window.addEventListener('portfolio:sync', handleSync);
+    return () => window.removeEventListener('portfolio:sync', handleSync);
+  }, []);
+
+  // Synchronize document title with dynamic profile
+  useEffect(() => {
+    if (profile?.name) {
+      document.title = `${profile.name} — ${profile.roleTitle || 'Portfolio'}`;
+    }
+  }, [profile?.name, profile?.roleTitle]);
 
   // Synchronize route with window.location.pathname and browser history
   useEffect(() => {
@@ -97,6 +126,7 @@ export default function App() {
         currentView={currentView}
         onNavigate={navigateTo}
         isAdminLoggedIn={isAdminLoggedIn}
+        profile={profile}
       />
 
       {/* Main Content Area */}
@@ -104,16 +134,21 @@ export default function App() {
         {currentView === 'portfolio' ? (
           <div>
             <Hero
+              profile={profile}
               onExploreProjects={() => scrollToSection('projects')}
               onContactClick={() => scrollToSection('contact')}
             />
-            <About />
+            <About profile={profile} />
             <Projects
               onNavigateToAdmin={() => navigateTo('admin')}
               isAdminLoggedIn={isAdminLoggedIn}
             />
-            <Contact />
-            <Footer onNavigateToAdmin={() => navigateTo('admin')} />
+            <Contact profile={profile} />
+            <Footer
+              onNavigateToAdmin={() => navigateTo('admin')}
+              isAdminLoggedIn={isAdminLoggedIn}
+              profile={profile}
+            />
           </div>
         ) : (
           <div>

@@ -1,22 +1,33 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Briefcase, GraduationCap, Calendar, MapPin, CheckCircle2, ChevronRight, Layers, Sparkles } from 'lucide-react';
-import { TIMELINE_EXPERIENCE, TIMELINE_EDUCATION, SKILL_CATEGORIES } from '../data/initialData';
+import { UserProfile } from '../types';
+import { DEFAULT_PROFILE, TIMELINE_EXPERIENCE, TIMELINE_EDUCATION, SKILL_CATEGORIES } from '../data/initialData';
 
-export const About: React.FC = () => {
+interface AboutProps {
+  profile?: UserProfile;
+}
+
+export const About: React.FC<AboutProps> = ({ profile = DEFAULT_PROFILE }) => {
   const [timelineTab, setTimelineTab] = useState<'all' | 'experience' | 'education'>('all');
   const [activeSkillCategory, setActiveSkillCategory] = useState<string>('All');
 
+  const p = profile || DEFAULT_PROFILE;
+  const experienceList = p.experience && p.experience.length > 0 ? p.experience : TIMELINE_EXPERIENCE;
+  const educationList = p.education && p.education.length > 0 ? p.education : TIMELINE_EDUCATION;
+  const skillsList = p.skills && p.skills.length > 0 ? p.skills : SKILL_CATEGORIES;
+  const competencies = p.competencies && p.competencies.length > 0 ? p.competencies : DEFAULT_PROFILE.competencies;
+
   const allTimeline = [
-    ...TIMELINE_EXPERIENCE,
-    ...TIMELINE_EDUCATION,
+    ...experienceList,
+    ...educationList,
   ];
 
   const filteredTimeline = timelineTab === 'all'
     ? allTimeline
     : timelineTab === 'experience'
-    ? TIMELINE_EXPERIENCE
-    : TIMELINE_EDUCATION;
+    ? experienceList
+    : educationList;
 
   return (
     <section id="about" className="py-20 sm:py-28 border-b border-white/5 bg-[#050505]">
@@ -36,23 +47,23 @@ export const About: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-20 items-start">
           <div className="lg:col-span-7 space-y-6 text-white/80 text-base sm:text-lg leading-relaxed">
             <p className="font-serif italic text-xl sm:text-2xl text-white/90 leading-relaxed font-light">
-              "Engineering revolves around cognitive ergonomics for developers, zero-tolerance for silent failures in distributed state, and rigorous digital aesthetics on the client."
+              "{p.aboutQuote || DEFAULT_PROFILE.aboutQuote}"
             </p>
             <p className="text-white/70 text-base leading-relaxed">
-              I am a full-stack engineer and distributed systems architect with over seven years of professional experience turning ambiguous product objectives into resilient, high-velocity infrastructure.
+              {p.aboutBio1 || DEFAULT_PROFILE.aboutBio1}
             </p>
             <p className="text-white/70 text-base leading-relaxed">
-              Whether orchestrating high-throughput Kafka streaming services or refining React design systems with sub-millisecond interaction speeds, I take ownership across the entire continuum from concept through zero-downtime deployment.
+              {p.aboutBio2 || DEFAULT_PROFILE.aboutBio2}
             </p>
 
             <div className="pt-2 flex flex-wrap gap-4 text-xs font-mono uppercase tracking-wider text-white/50">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-white/5 border border-white/10">
                 <MapPin className="w-3.5 h-3.5 text-[#F27D26]" />
-                <span>San Francisco, CA & Remote</span>
+                <span>{p.location || 'San Francisco, CA & Remote'}</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-white/5 border border-white/10">
                 <CheckCircle2 className="w-3.5 h-3.5 text-[#F27D26]" />
-                <span>Open to Staff / Lead / Senior Roles</span>
+                <span>{p.availabilityStatus || 'Open to Staff / Lead / Senior Roles'}</span>
               </div>
             </div>
           </div>
@@ -63,22 +74,14 @@ export const About: React.FC = () => {
               Core Competencies & Focus
             </h3>
             <ul className="space-y-4 text-sm text-white/80">
-              <li className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F27D26] mt-2 shrink-0" />
-                <span><strong className="text-white">Distributed Architecture:</strong> Event-driven systems, micro-frontends, caching tiers, and resilient RPC interfaces.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F27D26] mt-2 shrink-0" />
-                <span><strong className="text-white">Client-Side Performance:</strong> Strict bundle budgets, React Server Components, SSR hydration tuning, and Framer Motion choreography.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F27D26] mt-2 shrink-0" />
-                <span><strong className="text-white">Developer Experience (DX):</strong> AST code generators, monorepo toolchains, CI/CD automated test parallelization.</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#F27D26] mt-2 shrink-0" />
-                <span><strong className="text-white">Security & Zero-Trust:</strong> WebAuthn, OAuth2/OIDC, Web Crypto encryption, role-based authorization pipelines.</span>
-              </li>
+              {competencies.map((comp, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#F27D26] mt-2 shrink-0" />
+                  <span>
+                    <strong className="text-white">{comp.title}:</strong> {comp.description}
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -100,7 +103,7 @@ export const About: React.FC = () => {
 
             {/* Category Filter Pills */}
             <div className="flex flex-wrap gap-1.5 p-1 bg-white/5 border border-white/10 rounded">
-              {['All', ...SKILL_CATEGORIES.map(c => c.name)].map((cat) => (
+              {['All', ...skillsList.map(c => c.name)].map((cat) => (
                 <button
                   key={cat}
                   id={`skill-filter-${cat.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
@@ -118,7 +121,7 @@ export const About: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {SKILL_CATEGORIES
+            {skillsList
               .filter(cat => activeSkillCategory === 'All' || cat.name === activeSkillCategory)
               .map((group) => (
                 <div

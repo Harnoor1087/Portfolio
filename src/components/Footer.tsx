@@ -1,14 +1,19 @@
 import React from 'react';
 import { ArrowUp, Terminal, Shield, Heart } from 'lucide-react';
+import { UserProfile } from '../types';
 
 interface FooterProps {
   onNavigateToAdmin: () => void;
   isAdminLoggedIn?: boolean;
+  profile?: UserProfile;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigateToAdmin, isAdminLoggedIn = false }) => {
+export const Footer: React.FC<FooterProps> = ({ onNavigateToAdmin, isAdminLoggedIn = false, profile }) => {
   const [clickCount, setClickCount] = React.useState(0);
   const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const name = profile?.name || 'Alex Rivera';
+  const roleTitle = profile?.roleTitle || 'Staff Full-Stack Engineer & Distributed Systems';
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -49,9 +54,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateToAdmin, isAdminLogged
             </button>
             <div>
               <div className="font-mono font-bold tracking-wider text-white text-xs uppercase">
-                Alex Rivera <span className="text-[#F27D26]">//</span> 2026
+                {name} <span className="text-[#F27D26]">//</span> 2026
               </div>
-              <div className="text-[11px] font-mono text-white/40">Staff Full-Stack Engineer & Distributed Systems</div>
+              <div className="text-[11px] font-mono text-white/40">{roleTitle}</div>
             </div>
           </div>
 

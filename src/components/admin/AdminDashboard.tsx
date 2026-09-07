@@ -21,11 +21,13 @@ import {
   EyeOff,
   Calendar,
   X,
+  User,
 } from 'lucide-react';
 import { Project, ProjectInput, ContactMessage } from '../../types';
 import { api } from '../../services/api';
 import { ProjectModal } from './ProjectModal';
 import { DeleteConfirmModal } from './DeleteConfirmModal';
+import { ProfileEditor } from './ProfileEditor';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -33,7 +35,7 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onReturnToPortfolio }) => {
-  const [activeTab, setActiveTab] = useState<'projects' | 'messages'>('projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'profile' | 'messages'>('projects');
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
   const [projects, setProjects] = useState<Project[]>([]);
   const [messages, setMessages] = useState<ContactMessage[]>([]);
@@ -305,6 +307,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
               >
                 <Layers className="w-3.5 h-3.5" />
                 <span>Projects ({projects.length})</span>
+              </button>
+
+              <button
+                id="admin-tab-profile"
+                onClick={() => setActiveTab('profile')}
+                className={`px-4 py-2 rounded text-xs font-mono uppercase tracking-wider font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'profile'
+                    ? 'bg-[#F27D26] text-black shadow-md'
+                    : 'text-white/50 hover:text-white'
+                }`}
+              >
+                <User className="w-3.5 h-3.5" />
+                <span>Profile & Bio</span>
               </button>
 
               <button
@@ -731,6 +746,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
               </div>
             )}
           </div>
+        )}
+
+        {/* PROFILE & BIO TAB CONTENT */}
+        {activeTab === 'profile' && (
+          <ProfileEditor
+            onReturnToPortfolio={onReturnToPortfolio}
+            showNotification={showNotification}
+          />
         )}
 
         {/* MESSAGES TAB CONTENT */}

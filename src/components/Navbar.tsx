@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Menu, X, ArrowUpRight, Terminal, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { UserProfile } from '../types';
 
 interface NavbarProps {
   currentView: 'portfolio' | 'admin';
   onNavigate: (view: 'portfolio' | 'admin') => void;
   isAdminLoggedIn: boolean;
+  profile?: UserProfile;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, isAdminLoggedIn }) => {
+export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, isAdminLoggedIn, profile }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'AR';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  const initials = getInitials(profile?.name);
+  const badgeRole = profile?.badgeRole || 'Staff SWE';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,10 +66,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentView, onNavigate, isAdmin
           className="flex items-center gap-3 group text-left cursor-pointer"
         >
           <div className="text-xl sm:text-2xl font-bold tracking-tighter text-white">
-            AR<span className="text-[#F27D26]">.</span>
+            {initials}<span className="text-[#F27D26]">.</span>
           </div>
           <span className="hidden sm:inline-block text-[10px] uppercase tracking-[0.25em] font-mono px-2 py-0.5 rounded border border-white/10 text-white/40 bg-white/5">
-            Staff SWE
+            {badgeRole}
           </span>
         </button>
 

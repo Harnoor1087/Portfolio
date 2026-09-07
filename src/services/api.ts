@@ -1,4 +1,4 @@
-import { Project, ProjectInput, ContactMessage, AdminAuthResponse } from '../types';
+import { Project, ProjectInput, ContactMessage, AdminAuthResponse, UserProfile } from '../types';
 
 const TOKEN_KEY = 'portfolio_admin_token';
 
@@ -183,5 +183,41 @@ export const api = {
       throw new Error(data.error || 'Failed to seed projects');
     }
     return data.projects;
+  },
+
+  // Profile & Bio Management
+  async getProfile(): Promise<UserProfile> {
+    const res = await fetch('/api/profile');
+    if (!res.ok) {
+      throw new Error('Failed to fetch profile data');
+    }
+    return res.json();
+  },
+
+  async updateProfile(data: Partial<UserProfile>): Promise<UserProfile> {
+    const res = await fetch('/api/profile', {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      throw new Error(result.error || 'Failed to update profile');
+    }
+    window.dispatchEvent(new CustomEvent('portfolio:sync'));
+    return result.profile;
+  },
+
+  async resetProfile(): Promise<UserProfile> {
+    const res = await fetch('/api/profile/reset', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    const result = await res.json();
+    if (!res.ok) {
+      throw new Error(result.error || 'Failed to reset profile');
+    }
+    window.dispatchEvent(new CustomEvent('portfolio:sync'));
+    return result.profile;
   },
 };

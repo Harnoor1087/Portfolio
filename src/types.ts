@@ -28,9 +28,15 @@ export interface TimelineItem {
   skills?: string[];
 }
 
+export interface SkillItem {
+  name: string;
+  level?: 'Expert' | 'Advanced' | 'Proficient';
+  icon?: string;
+}
+
 export interface SkillCategory {
   name: string;
-  skills: { name: string; level?: 'Expert' | 'Advanced' | 'Proficient'; icon?: string }[];
+  skills: SkillItem[];
 }
 
 export interface ContactMessage {
@@ -41,6 +47,58 @@ export interface ContactMessage {
   message: string;
   createdAt: string;
   read: boolean;
+}
+
+export interface HeroStat {
+  value: string;
+  label: string;
+}
+
+export interface CompetencyItem {
+  title: string;
+  description: string;
+}
+
+export interface UserProfile {
+  // Identity & Navigation
+  name: string;
+  roleTitle: string;
+  badgeRole: string;
+  availabilityStatus: string;
+  location: string;
+  timezone: string;
+  email: string;
+
+  // Hero Section
+  heroHeadlineLine1: string;
+  heroHeadlineLine2: string;
+  heroHeadlineLine3: string;
+  heroQuote: string;
+  stats: HeroStat[];
+
+  // Social Links
+  githubUrl: string;
+  linkedinUrl: string;
+  twitterUrl?: string;
+  resumeUrl?: string;
+
+  // About Section
+  aboutQuote: string;
+  aboutBio1: string;
+  aboutBio2: string;
+  competencies: CompetencyItem[];
+
+  // Skills
+  skills: SkillCategory[];
+
+  // Timeline
+  experience: TimelineItem[];
+  education: TimelineItem[];
+
+  // Contact Section
+  contactHeading: string;
+  contactSubheading: string;
+  responseSla: string;
 }
 
 export interface AdminAuthResponse {

@@ -2,8 +2,15 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Mail, Send, Check, Copy, Github, Linkedin, Twitter, MessageSquare, Clock, MapPin, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
+import { UserProfile } from '../types';
+import { DEFAULT_PROFILE } from '../data/initialData';
 
-export const Contact: React.FC = () => {
+interface ContactProps {
+  profile?: UserProfile;
+}
+
+export const Contact: React.FC<ContactProps> = ({ profile = DEFAULT_PROFILE }) => {
+  const p = profile || DEFAULT_PROFILE;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -15,7 +22,7 @@ export const Contact: React.FC = () => {
   const [feedbackMsg, setFeedbackMsg] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const emailAddress = 'alex.rivera.swe@gmail.com';
+  const emailAddress = p.email || DEFAULT_PROFILE.email;
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(emailAddress);
@@ -58,10 +65,10 @@ export const Contact: React.FC = () => {
                 (05) // INITIATE TRANSMISSION
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4">
-                Let's construct something extraordinary together<span className="text-[#F27D26]">.</span>
+                {p.contactHeading || "Let's construct something extraordinary together"}<span className="text-[#F27D26]">.</span>
               </h2>
               <p className="text-white/70 text-base sm:text-lg leading-relaxed font-light">
-                Whether you have a Staff/Principal engineering opportunity, need architectural advisory for a distributed platform, or want to discuss novel ideas—my inbox is always open.
+                {p.contactSubheading || "Whether you have a Staff/Principal engineering opportunity, need architectural advisory for a distributed platform, or want to discuss novel ideas—my inbox is always open."}
               </p>
             </div>
 
@@ -99,7 +106,7 @@ export const Contact: React.FC = () => {
                 <div>
                   <div className="text-[10px] uppercase font-mono tracking-wider text-white/40">Response SLA</div>
                   <div className="text-xs sm:text-sm font-mono text-white/90">
-                    Within 24 business hours (PST)
+                    {p.responseSla || 'Within 24 business hours (PST)'}
                   </div>
                 </div>
               </div>
@@ -111,7 +118,7 @@ export const Contact: React.FC = () => {
                 <div>
                   <div className="text-[10px] uppercase font-mono tracking-wider text-white/40">Location Base</div>
                   <div className="text-xs sm:text-sm font-mono text-white/90">
-                    San Francisco Bay Area, CA & Remote
+                    {p.location || 'San Francisco Bay Area, CA & Remote'} {p.timezone ? `(${p.timezone})` : ''}
                   </div>
                 </div>
               </div>
@@ -123,36 +130,42 @@ export const Contact: React.FC = () => {
                 Verified Profiles
               </div>
               <div className="flex items-center gap-3">
-                <a
-                  id="social-link-github"
-                  href="https://github.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 rounded bg-white/5 border border-white/10 text-white/60 hover:text-[#F27D26] hover:border-[#F27D26]/40 transition-colors"
-                  aria-label="GitHub Profile"
-                >
-                  <Github className="w-4 h-4" />
-                </a>
-                <a
-                  id="social-link-linkedin"
-                  href="https://linkedin.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 rounded bg-white/5 border border-white/10 text-white/60 hover:text-[#F27D26] hover:border-[#F27D26]/40 transition-colors"
-                  aria-label="LinkedIn Profile"
-                >
-                  <Linkedin className="w-4 h-4" />
-                </a>
-                <a
-                  id="social-link-twitter"
-                  href="https://x.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3 rounded bg-white/5 border border-white/10 text-white/60 hover:text-[#F27D26] hover:border-[#F27D26]/40 transition-colors"
-                  aria-label="X / Twitter"
-                >
-                  <Twitter className="w-4 h-4" />
-                </a>
+                {p.githubUrl && (
+                  <a
+                    id="social-link-github"
+                    href={p.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded bg-white/5 border border-white/10 text-white/60 hover:text-[#F27D26] hover:border-[#F27D26]/40 transition-colors"
+                    aria-label="GitHub Profile"
+                  >
+                    <Github className="w-4 h-4" />
+                  </a>
+                )}
+                {p.linkedinUrl && (
+                  <a
+                    id="social-link-linkedin"
+                    href={p.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded bg-white/5 border border-white/10 text-white/60 hover:text-[#F27D26] hover:border-[#F27D26]/40 transition-colors"
+                    aria-label="LinkedIn Profile"
+                  >
+                    <Linkedin className="w-4 h-4" />
+                  </a>
+                )}
+                {p.twitterUrl && (
+                  <a
+                    id="social-link-twitter"
+                    href={p.twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-3 rounded bg-white/5 border border-white/10 text-white/60 hover:text-[#F27D26] hover:border-[#F27D26]/40 transition-colors"
+                    aria-label="X / Twitter"
+                  >
+                    <Twitter className="w-4 h-4" />
+                  </a>
+                )}
               </div>
             </div>
 

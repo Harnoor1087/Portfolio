@@ -3,6 +3,8 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
+import { DEFAULT_PROFILE } from "./src/data/initialData";
+import { UserProfile } from "./src/types";
 
 dotenv.config();
 
@@ -41,6 +43,7 @@ interface DbSchema {
     createdAt: string;
     read: boolean;
   }>;
+  profile: UserProfile;
 }
 
 const DEFAULT_PROJECTS = [
@@ -130,6 +133,7 @@ function initDb(): DbSchema {
     const initialData: DbSchema = {
       projects: DEFAULT_PROJECTS,
       messages: [],
+      profile: JSON.parse(JSON.stringify(DEFAULT_PROFILE)),
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), "utf-8");
     return initialData;
@@ -142,12 +146,17 @@ function initDb(): DbSchema {
       ...p,
       visible: p.visible !== undefined ? p.visible : true,
     }));
+    if (!parsed.profile) {
+      parsed.profile = JSON.parse(JSON.stringify(DEFAULT_PROFILE));
+      fs.writeFileSync(DB_FILE, JSON.stringify(parsed, null, 2), "utf-8");
+    }
     return parsed;
   } catch (err) {
     console.error("Failed to parse db.json, re-initializing:", err);
     const initialData: DbSchema = {
       projects: DEFAULT_PROJECTS,
       messages: [],
+      profile: JSON.parse(JSON.stringify(DEFAULT_PROFILE)),
     };
     fs.writeFileSync(DB_FILE, JSON.stringify(initialData, null, 2), "utf-8");
     return initialData;
@@ -369,6 +378,65 @@ app.post("/api/seed", (req, res) => {
   db.projects = DEFAULT_PROJECTS;
   saveDb(db);
   res.json({ success: true, count: db.projects.length, projects: db.projects });
+});
+
+/* =========================================================================
+   PROFILE & BIO MANAGEMENT ENDPOINTS
+   ========================================================================= */
+
+// GET /api/profile - Public endpoint to retrieve developer profile data
+app.get("/api/profile", (_req, res) => {
+  res.json(db.profile || DEFAULT_PROFILE);
+});
+
+// PUT /api/profile - Protected endpoint to update developer profile data
+app.put("/api/profile", requireAdminAuth, (req, res) => {
+  const updatedData = req.body;
+  if (!updatedData || typeof updatedData !== "object") {
+    return res.status(400).json({ error: "Invalid profile data payload" });
+  }
+
+  // Merge with existing profile data
+  db.profile = {
+    ...db.profile,
+    ...updatedData,
+    name: updatedData.name !== undefined ? String(updatedData.name).trim() : db.profile.name,
+    roleTitle: updatedData.roleTitle !== undefined ? String(updatedData.roleTitle).trim() : db.profile.roleTitle,
+    badgeRole: updatedData.badgeRole !== undefined ? String(updatedData.badgeRole).trim() : db.profile.badgeRole,
+    availabilityStatus: updatedData.availabilityStatus !== undefined ? String(updatedData.availabilityStatus).trim() : db.profile.availabilityStatus,
+    location: updatedData.location !== undefined ? String(updatedData.location).trim() : db.profile.location,
+    timezone: updatedData.timezone !== undefined ? String(updatedData.timezone).trim() : db.profile.timezone,
+    email: updatedData.email !== undefined ? String(updatedData.email).trim() : db.profile.email,
+    heroHeadlineLine1: updatedData.heroHeadlineLine1 !== undefined ? String(updatedData.heroHeadlineLine1).trim() : db.profile.heroHeadlineLine1,
+    heroHeadlineLine2: updatedData.heroHeadlineLine2 !== undefined ? String(updatedData.heroHeadlineLine2).trim() : db.profile.heroHeadlineLine2,
+    heroHeadlineLine3: updatedData.heroHeadlineLine3 !== undefined ? String(updatedData.heroHeadlineLine3).trim() : db.profile.heroHeadlineLine3,
+    heroQuote: updatedData.heroQuote !== undefined ? String(updatedData.heroQuote).trim() : db.profile.heroQuote,
+    stats: Array.isArray(updatedData.stats) ? updatedData.stats : db.profile.stats,
+    githubUrl: updatedData.githubUrl !== undefined ? String(updatedData.githubUrl).trim() : db.profile.githubUrl,
+    linkedinUrl: updatedData.linkedinUrl !== undefined ? String(updatedData.linkedinUrl).trim() : db.profile.linkedinUrl,
+    twitterUrl: updatedData.twitterUrl !== undefined ? String(updatedData.twitterUrl).trim() : db.profile.twitterUrl,
+    resumeUrl: updatedData.resumeUrl !== undefined ? String(updatedData.resumeUrl).trim() : db.profile.resumeUrl,
+    aboutQuote: updatedData.aboutQuote !== undefined ? String(updatedData.aboutQuote).trim() : db.profile.aboutQuote,
+    aboutBio1: updatedData.aboutBio1 !== undefined ? String(updatedData.aboutBio1).trim() : db.profile.aboutBio1,
+    aboutBio2: updatedData.aboutBio2 !== undefined ? String(updatedData.aboutBio2).trim() : db.profile.aboutBio2,
+    competencies: Array.isArray(updatedData.competencies) ? updatedData.competencies : db.profile.competencies,
+    skills: Array.isArray(updatedData.skills) ? updatedData.skills : db.profile.skills,
+    experience: Array.isArray(updatedData.experience) ? updatedData.experience : db.profile.experience,
+    education: Array.isArray(updatedData.education) ? updatedData.education : db.profile.education,
+    contactHeading: updatedData.contactHeading !== undefined ? String(updatedData.contactHeading).trim() : db.profile.contactHeading,
+    contactSubheading: updatedData.contactSubheading !== undefined ? String(updatedData.contactSubheading).trim() : db.profile.contactSubheading,
+    responseSla: updatedData.responseSla !== undefined ? String(updatedData.responseSla).trim() : db.profile.responseSla,
+  };
+
+  saveDb(db);
+  res.json({ success: true, profile: db.profile });
+});
+
+// POST /api/profile/reset - Protected endpoint to reset profile to defaults
+app.post("/api/profile/reset", requireAdminAuth, (_req, res) => {
+  db.profile = JSON.parse(JSON.stringify(DEFAULT_PROFILE));
+  saveDb(db);
+  res.json({ success: true, profile: db.profile, message: "Profile reset to default successfully" });
 });
 
 // POST /api/contact - Public contact form submission
