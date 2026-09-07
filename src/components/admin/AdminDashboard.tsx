@@ -56,6 +56,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
 
   // Message inspection modal
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+  const [connMode, setConnMode] = useState<'server' | 'local'>('local');
 
   const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
     setNotification({ text, type });
@@ -65,6 +66,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
   const loadData = async () => {
     try {
       setLoading(true);
+      api.getConnectionStatus().then(setConnMode).catch(() => setConnMode('local'));
       const [projData, msgData] = await Promise.all([
         api.getProjects(true), // Load full project list including private drafts
         api.getMessages().catch(() => []),
@@ -221,8 +223,23 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
                 <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase tracking-wider bg-[#F27D26]/20 text-[#F27D26] border border-[#F27D26]/30">
                   Live Session
                 </span>
+                {connMode === 'server' ? (
+                  <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5" title="Connected to Express Node.js server.">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>Node Server</span>
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/30 flex items-center gap-1.5" title="Static hosting mode (Vercel/Netlify). Data persists securely in browser LocalStorage.">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    <span>LocalStorage Mode</span>
+                  </span>
+                )}
               </div>
-              <p className="text-xs font-mono text-white/50">Direct write access to full-stack portfolio database records</p>
+              <p className="text-xs font-mono text-white/50">
+                {connMode === 'server'
+                  ? 'Direct write access to full-stack portfolio database records (db.json)'
+                  : 'Direct write access to portfolio records (Persisted in Browser LocalStorage)'}
+              </p>
             </div>
           </div>
 
@@ -264,7 +281,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, onRetu
           <div className="p-5 rounded bg-[#080808] border border-white/5">
             <div className="text-[10px] font-mono uppercase tracking-wider text-white/40">Total in Database</div>
             <div className="text-2xl font-bold font-mono text-white mt-1">{projects.length}</div>
-            <div className="text-[10px] font-mono text-white/30 mt-0.5">Persisted in db.json</div>
+            <div className="text-[10px] font-mono text-white/30 mt-0.5">
+              {connMode === 'server' ? 'Persisted in db.json' : 'Persisted in LocalStorage'}
+            </div>
           </div>
 
           <div className="p-5 rounded bg-[#080808] border border-emerald-500/20 bg-emerald-950/10">

@@ -106,4 +106,5 @@ export interface AdminAuthResponse {
   token?: string;
   message?: string;
   error?: string;
+  user?: { username: string };
 }
